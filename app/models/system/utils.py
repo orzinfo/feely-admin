@@ -5,7 +5,7 @@ from uuid import UUID
 
 from tortoise import models, fields
 
-from app.settings import APP_SETTINGS
+from app.configs import APP_SETTINGS
 from app.utils.tools import to_lower_camel_case
 
 

@@ -3,7 +3,7 @@ from passlib import pwd
 from passlib.context import CryptContext
 
 from app.schemas.login import JWTPayload
-from app.settings import APP_SETTINGS
+from app.configs import APP_SETTINGS
 
 # pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")

@@ -4,6 +4,7 @@ from fastapi.middleware import Middleware
 from fastapi.middleware.cors import CORSMiddleware
 from tortoise.contrib.fastapi import register_tortoise
 from tortoise.exceptions import MultipleObjectsReturned
+from loguru import logger
 
 from app.api import api_router
 from app.controllers import role_controller
@@ -24,20 +25,30 @@ from app.core.exceptions import (
 from app.core.middlewares import BackGroundTaskMiddleware, APILoggerMiddleware, APILoggerAddResponseMiddleware
 from app.models.system import Menu, Role, User, Button, Api
 from app.models.system import StatusType, IconType, MenuType
-from app.settings import APP_SETTINGS
+from app.configs import APP_SETTINGS
 
 
 def make_middlewares():
+    """
+    创建中间件列表
+    优化中间件配置，提供更好的性能和可维护性
+    """
     middleware = [
+        # CORS中间件 - 必须在最前面
         Middleware(
             CORSMiddleware,
             allow_origins=APP_SETTINGS.CORS_ORIGINS,
             allow_credentials=APP_SETTINGS.CORS_ALLOW_CREDENTIALS,
             allow_methods=APP_SETTINGS.CORS_ALLOW_METHODS,
             allow_headers=APP_SETTINGS.CORS_ALLOW_HEADERS,
+            # 优化CORS配置
+            max_age=600,  # 预检请求缓存时间
         ),
+        # 后台任务中间件
         Middleware(BackGroundTaskMiddleware),
+        # API日志中间件
         Middleware(APILoggerMiddleware),
+        # API响应日志中间件
         Middleware(APILoggerAddResponseMiddleware)
     ]
     return middleware
@@ -64,19 +75,36 @@ def register_routers(app: FastAPI, prefix: str = "/api"):
 
 
 async def modify_db():
-    command = Command(tortoise_config=APP_SETTINGS.TORTOISE_ORM, app="app_system")
+    command = Command(tortoise_config=APP_SETTINGS.TORTOISE_ORM, app="models")
     try:
+        # 首先尝试初始化数据库
         await command.init_db(safe=True)
+        logger.info("Database initialized successfully")
     except FileExistsError:
-        ...
+        logger.info("Database already exists")
+    except Exception as e:
+        logger.warning(f"Database initialization failed: {e}")
 
     try:
+        # 初始化 Aerich
         await command.init()
-    except Exception:
-        ...
+        logger.info("Aerich initialized successfully")
+    except Exception as e:
+        logger.warning(f"Aerich initialization failed: {e}")
 
-    await command.migrate()
-    await command.upgrade(run_in_transaction=True)
+    try:
+        # 生成迁移
+        await command.migrate()
+        logger.info("Migration generated successfully")
+    except Exception as e:
+        logger.warning(f"Migration generation failed: {e}")
+
+    try:
+        # 应用迁移
+        await command.upgrade(run_in_transaction=True)
+        logger.info("Migration applied successfully")
+    except Exception as e:
+        logger.warning(f"Migration application failed: {e}")
 
 
 async def init_menus():
@@ -86,7 +114,7 @@ async def init_menus():
 
     constant_menu = [
         Menu(
-            status=StatusType.enable,
+            status_type=StatusType.enable,
             parent_id=0,
             menu_type=MenuType.catalog,
             menu_name="login",
@@ -100,7 +128,7 @@ async def init_menus():
             hide_in_menu=True,
         ),
         Menu(
-            status=StatusType.enable,
+            status_type=StatusType.enable,
             parent_id=0,
             menu_type=MenuType.catalog,
             menu_name="403",
@@ -113,7 +141,7 @@ async def init_menus():
             hide_in_menu=True,
         ),
         Menu(
-            status=StatusType.enable,
+            status_type=StatusType.enable,
             parent_id=0,
             menu_type=MenuType.catalog,
             menu_name="404",
@@ -126,7 +154,7 @@ async def init_menus():
             hide_in_menu=True,
         ),
         Menu(
-            status=StatusType.enable,
+            status_type=StatusType.enable,
             parent_id=0,
             menu_type=MenuType.catalog,
             menu_name="500",
@@ -143,7 +171,7 @@ async def init_menus():
 
     # 1
     await Menu.create(
-        status=StatusType.enable,
+        status_type=StatusType.enable,
         parent_id=0,
         menu_type=MenuType.menu,
         menu_name="首页",
@@ -171,7 +199,7 @@ async def init_menus():
 
     # 2
     root_menu = await Menu.create(
-        status=StatusType.enable,
+        status_type=StatusType.enable,
         parent_id=0,
         menu_type=MenuType.catalog,
         menu_name="功能",
@@ -185,7 +213,7 @@ async def init_menus():
     )
 
     parent_menu = await Menu.create(
-        status=StatusType.enable,
+        status_type=StatusType.enable,
         parent_id=root_menu.id,
         menu_type=MenuType.menu,
         menu_name="切换权限",

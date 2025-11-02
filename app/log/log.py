@@ -6,7 +6,6 @@ from typing import cast
 from loguru import logger
 
 from app.core.ctx import CTX_X_REQUEST_ID
-from app.settings import APP_SETTINGS
 
 
 def x_request_id_filter(record):
@@ -18,6 +17,9 @@ class Logger:
     """输出日志到文件和控制台"""
 
     def __init__(self):
+        # 延迟导入配置以避免循环依赖
+        from app.configs import APP_SETTINGS
+        
         log_name = f"Fast_{time.strftime('%Y-%m-%d', time.localtime()).replace('-', '_')}.log"
         log_path = APP_SETTINGS.LOGS_ROOT / log_name
         self.logger = logger

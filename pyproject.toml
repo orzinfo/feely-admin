@@ -92,6 +92,6 @@ url = "https://pypi.tuna.tsinghua.edu.cn/simple/"
 verify_ssl = true
 
 [tool.aerich]
-tortoise_orm = "app.settings.TORTOISE_ORM"
+tortoise_orm = "app.configs.APP_SETTINGS.TORTOISE_ORM"
 location = "./migrations"
 src_folder = "./."

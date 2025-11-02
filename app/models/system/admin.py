@@ -14,7 +14,7 @@ class User(BaseModel, TimestampMixin):
     last_login = fields.DatetimeField(null=True, description="最后登录时间")
     status_type = fields.CharEnumField(enum_type=StatusType, default=StatusType.enable, description="状态")
 
-    by_user_roles: fields.ManyToManyRelation['Role'] = fields.ManyToManyField("app_system.Role", related_name="by_role_users")
+    by_user_roles: fields.ManyToManyRelation['Role'] = fields.ManyToManyField("models.Role", related_name="by_role_users")
 
     class Meta:
         table = "users"
@@ -34,12 +34,13 @@ class Role(BaseModel, TimestampMixin):
     role_name = fields.CharField(max_length=20, unique=True, description="角色名称")
     role_code = fields.CharField(max_length=20, unique=True, description="角色编码")
     role_desc = fields.CharField(max_length=500, null=True, blank=True, description="角色描述")
-    by_role_home: fields.ForeignKeyRelation['Menu'] = fields.ForeignKeyField("app_system.Menu", related_name=None, description="角色首页")
+    by_role_home: fields.ForeignKeyRelation['Menu'] = fields.ForeignKeyField("models.Menu", related_name=None, description="角色首页")
     status_type = fields.CharEnumField(enum_type=StatusType, default=StatusType.enable, description="状态")
 
-    by_role_menus: fields.ManyToManyRelation['Menu'] = fields.ManyToManyField("app_system.Menu", related_name="by_menu_roles")
-    by_role_apis: fields.ManyToManyRelation['Api'] = fields.ManyToManyField("app_system.Api", related_name="by_api_roles")
-    by_role_buttons: fields.ManyToManyRelation['Button'] = fields.ManyToManyField("app_system.Button", related_name="by_button_roles")
+    # 关联关系
+    by_role_menus: fields.ManyToManyRelation['Menu'] = fields.ManyToManyField("models.Menu", related_name="by_menu_roles")
+    by_role_apis: fields.ManyToManyRelation['Api'] = fields.ManyToManyField("models.Api", related_name="by_api_roles")
+    by_role_buttons: fields.ManyToManyRelation['Button'] = fields.ManyToManyField("models.Button", related_name="by_button_roles")
     by_role_users: fields.ReverseRelation['User']
 
     class Meta:
@@ -91,14 +92,14 @@ class Menu(BaseModel, TimestampMixin):
     multi_tab = fields.BooleanField(default=False, description="是否支持多页签")
     keep_alive = fields.BooleanField(default=False, description="是否缓存")
     hide_in_menu = fields.BooleanField(default=False, description="是否在菜单隐藏")
-    active_menu: fields.ForeignKeyRelation['Menu'] = fields.ForeignKeyField("app_system.Menu", related_name=None, null=True, description="隐藏的路由需要激活的菜单")
+    active_menu: fields.ForeignKeyRelation['Menu'] = fields.ForeignKeyField("models.Menu", related_name=None, null=True, description="隐藏的路由需要激活的菜单")
     fixed_index_in_tab = fields.IntField(null=True, max_length=10, description="固定在页签的序号")
     status_type = fields.CharEnumField(enum_type=StatusType, default=StatusType.enable, description="菜单状态")
     redirect = fields.CharField(null=True, max_length=200, description="重定向路径")
     props = fields.BooleanField(default=False, description="是否为首路由")
     constant = fields.BooleanField(default=False, description="是否为公共路由")
 
-    by_menu_buttons: fields.ManyToManyRelation['Button'] = fields.ManyToManyField("app_system.Button", related_name="by_button_menus")
+    by_menu_buttons: fields.ManyToManyRelation['Button'] = fields.ManyToManyField("models.Button", related_name="by_button_menus")
     by_menu_roles: fields.ReverseRelation['Role']
 
     class Meta:
@@ -122,8 +123,8 @@ class Button(BaseModel, TimestampMixin):
 class Log(BaseModel):
     id = fields.IntField(pk=True, description="日志id")
     log_type = fields.CharEnumField(LogType, description="日志类型")
-    by_user: fields.ForeignKeyRelation['User'] = fields.ForeignKeyField(null=True, model_name="app_system.User", related_name=None, related_nameon_delete=fields.NO_ACTION, description="关联专员")
-    api_log: fields.OneToOneRelation['APILog'] = fields.OneToOneField("app_system.APILog", null=True, related_name=None, on_delete=fields.SET_NULL, description="API日志")
+    by_user: fields.ForeignKeyRelation['User'] = fields.ForeignKeyField(null=True, model_name="models.User", related_name=None, on_delete=fields.NO_ACTION, description="关联专员")
+    api_log: fields.OneToOneRelation['APILog'] = fields.OneToOneField("models.APILog", null=True, related_name=None, on_delete=fields.SET_NULL, description="API日志")
     log_detail_type = fields.CharEnumField(LogDetailType, null=True, description="日志详情类型")
     create_time = fields.DatetimeField(auto_now_add=True, description="创建时间")
     x_request_id = fields.CharField(null=True, max_length=32, description="请求id")

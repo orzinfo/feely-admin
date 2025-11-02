@@ -5,6 +5,8 @@ venv/
 .vscode/
 .ruff_cache/
 .pytest_cache/
+.trae
+ai/
 
 # Tortoise ORM generated files
 .mypy_cache/

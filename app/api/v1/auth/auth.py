@@ -13,7 +13,7 @@ from app.models.system import LogDetailType, LogType
 from app.models.system import User, Role, Button, StatusType
 from app.schemas.base import Fail, Success
 from app.schemas.login import CredentialsSchema, JWTOut, JWTPayload
-from app.settings import APP_SETTINGS
+from app.configs import APP_SETTINGS
 from app.utils.security import create_access_token
 
 router = APIRouter()

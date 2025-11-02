@@ -8,6 +8,9 @@ venv/
 .trae
 ai/
 
+# 
+.secrets.toml
+
 # Tortoise ORM generated files
 .mypy_cache/
 *.sqlite3

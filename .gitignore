@@ -8,8 +8,13 @@ venv/
 .trae
 ai/
 
-# 
+# Configuration and secrets files
 .secrets.toml
+.env
+.env.local
+.env.development
+.env.test
+.env.production
 
 # Tortoise ORM generated files
 .mypy_cache/

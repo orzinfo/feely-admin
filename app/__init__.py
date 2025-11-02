@@ -26,7 +26,7 @@ from app.models.system import Log
 from app.models.system import LogType, LogDetailType
 
 try:
-    from app.configs import APP_SETTINGS
+    from app.configs import APP_SETTINGS, get_current_env
 except ImportError:
     raise SettingNotFound("Can not import settings")
 
@@ -41,7 +41,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     
     # 启动阶段
     try:
-        log.info(f"Starting {app.title} v{app.version}")
+        current_env = get_current_env()
+        log.info(f"Starting {app.title} v{app.version} ({current_env} environment)")
         
         # 初始化数据库
         await modify_db()

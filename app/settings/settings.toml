@@ -23,9 +23,9 @@ JWT_ACCESS_TOKEN_EXPIRE_MINUTES = 30
 JWT_REFRESH_TOKEN_EXPIRE_MINUTES = 10080  # 7天
 
 # CORS 配置
-CORS_ORIGINS = ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:9527", "http://127.0.0.1:9527"]
+CORS_ORIGINS = ["http://localhost:9999", "http://127.0.0.1:9999", "http://localhost:9527", "http://127.0.0.1:9527"]
 CORS_ALLOW_CREDENTIALS = true
-CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
 CORS_ALLOW_HEADERS = ["*"]
 
 # 时间格式配置
@@ -40,11 +40,11 @@ ADD_LOG_ORIGINS_DECLUDE = ["/health", "/metrics", "/favicon.ico", "/docs", "/red
 engine = "tortoise.backends.mysql"
 timezone = "Asia/Shanghai"
 use_tz = false
-host = "localhost"
-port = 3306
+host = "124.222.160.158"
+port = 13306
 user = "root"
 password = ""  # 默认为空密码，生产环境通过环境变量或 .secrets.toml 覆盖
-database = "fastsoyadmin"
+database = "xjfapp"
 charset = "utf8mb4"
 # 连接池配置
 minsize = 1
@@ -61,10 +61,12 @@ url = "redis://localhost:6379/0"
 DEBUG = true
 # 继承 default 配置，只覆盖需要修改的部分
 
-# 开发环境使用 SQLite 数据库
+# 开发环境使用 MySQL 数据库
 [development.database]
-engine = "tortoise.backends.sqlite"
-database = "db.sqlite3"
+engine = "tortoise.backends.mysql"
+connect_timeout = 60
+minsize = 1
+maxsize = 5
 
 # 测试环境配置
 [testing]

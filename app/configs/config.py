@@ -70,7 +70,7 @@ validators = [
 
 # 初始化 Dynaconf 设置
 settings = Dynaconf(
-    settings_files=[str(CONFIG_DIR / "settings.toml")],
+    settings_files=[str(CONFIG_DIR / "settings.toml"), str(CONFIG_DIR / ".secrets.toml")],
     environments=True,
     env="development",
     load_dotenv=True,

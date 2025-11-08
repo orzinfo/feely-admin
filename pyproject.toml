@@ -1,14 +1,14 @@
 [project]
-name = "fast-soy-admin"
+name = "feely-admin"
 version = "0.1.0"
-description = "Default template for PDM package"
+description = "Default template for uv"
 authors = [
-    { name = "sleep1223", email = "sleep1223@outlook.com" },
+    { name = "orzinfo", email = "737757684@qq.com" },
 ]
 dependencies = [
     "fastapi>=0.111.0",
     "uvicorn>=0.29.0",
-    "tortoise-orm[aiosqlite]>=0.20.1",
+    "tortoise-orm[asyncmy]>=0.20.1",
     "pydantic>=2.7.1",
     "pydantic-settings>=2.2.1",
     "passlib>=1.7.4",
@@ -22,8 +22,9 @@ dependencies = [
     "redis>=4.6.0",
     "orjson>=3.10.12",
     "alibabacloud-dysmsapi20170525>=3.1.0",
+    "dynaconf>=3.2.12",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.14"
 readme = "README.md"
 license = { text = "MIT" }
 
@@ -89,7 +90,7 @@ includes = []
 [[tool.pdm.source]]
 name = "tsinghua"
 url = "https://pypi.tuna.tsinghua.edu.cn/simple/"
-verify_ssl = true
+verify_ssl = true   
 
 [tool.aerich]
 tortoise_orm = "app.configs.APP_SETTINGS.TORTOISE_ORM"

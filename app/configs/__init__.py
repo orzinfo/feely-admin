@@ -1,5 +1,5 @@
 """
-FastSoyAdmin 配置模块
+FeelyAdmin 配置模块
 
 使用 Dynaconf 进行现代化配置管理，提供统一的配置访问接口。
 配置文件位于 app/settings/ 目录下。

@@ -6,7 +6,7 @@
 
 <div align="center">
 
-# FastSoyAdmin
+# FeelyAdmin
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable-next-line MD036 -->
 
@@ -21,7 +21,7 @@
 [![black](https://img.shields.io/badge/code%20style-black-000000.svg?logo=python&logoColor=edb641)](https://github.com/psf/black)
 [![pyright](https://img.shields.io/badge/types-pyright-797952.svg?logo=python&logoColor=edb641)](https://github.com/Microsoft/pyright)
 [![ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
-<a href="点击链接加入群聊【FastSoyAdmin】：https://qm.qq.com/q/d8E3IKZLhK">
+<a href="点击链接加入群聊【FeelyAdmin】：https://qm.qq.com/q/d8E3IKZLhK">
     <img src="https://img.shields.io/badge/QQ%E7%BE%A4-960917455-orange?style=flat-square" alt="QQ Chat Group">
 </a>
 
@@ -31,11 +31,11 @@
 </div>
 
 > [!NOTE]
-> 如果您觉得 `FastSoyAdmin` 对您有所帮助，或者您喜欢我们的项目，请在 GitHub 上给我们一个 ⭐️。您的支持是我们持续改进和增加新功能的动力！感谢您的支持！
+> 如果您觉得 `FeelyAdmin` 对您有所帮助，或者您喜欢我们的项目，请在 GitHub 上给我们一个 ⭐️。您的支持是我们持续改进和增加新功能的动力！感谢您的支持！
 
 ## 简介
 
-[`FastSoyAdmin`](https://github.com/sleep1223/fast-soy-admin) 是一个现代且功能强大的后台管理模板，采用最新的技术栈，前端使用 Vue3、Vite5、TypeScript、Pinia 和 UnoCSS。后端采用 FastAPI、Pydantic 和 Tortoise ORM，并提供完善的 ApiFox 在线文档。它内置丰富的主题配置和组件，代码规范严谨，实现了自动化的文件路由系统。`FastSoyAdmin` 为您提供一站式的后台管理解决方案，开箱即用，同时也是快速学习前沿技术的最佳实践。
+[`FeelyAdmin`](https://github.com/sleep1223/fast-soy-admin) 是一个现代且功能强大的后台管理模板，采用最新的技术栈，前端使用 Vue3、Vite5、TypeScript、Pinia 和 UnoCSS。后端采用 FastAPI、Pydantic 和 Tortoise ORM，并提供完善的 ApiFox 在线文档。它内置丰富的主题配置和组件，代码规范严谨，实现了自动化的文件路由系统。`FeelyAdmin` 为您提供一站式的后台管理解决方案，开箱即用，同时也是快速学习前沿技术的最佳实践。
 
 ## 特性
 

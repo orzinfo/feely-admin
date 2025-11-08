@@ -6,7 +6,7 @@
 
 <div align="center">
 
-# FastSoyAdmin
+# FeelyAdmin
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable-next-line MD036 -->
 
@@ -28,11 +28,11 @@
 </div>
 
 > [!NOTE]
-> If you think `FastSoyAdmin` is helpful to you, or you like our project, please give us a ⭐️ on GitHub. Your support is the driving force for us to continue to improve and add new features! Thank you for your support!
+> If you think `FeelyAdmin` is helpful to you, or you like our project, please give us a ⭐️ on GitHub. Your support is the driving force for us to continue to improve and add new features! Thank you for your support!
 
 ## Introduction
 
-[`FastSoyAdmin`](https://github.com/sleep1223/fast-soy-admin) is a clean, elegant, beautiful and powerful admin template, based on the latest technology stack, front-end including Vue3, Vite5, TypeScript, Pinia and UnoCSS, back-end including FastAPI、Pydantic and Tortoise ORM. It has built-in rich theme configuration and components, strict code specifications, and an automated file routing system. In addition, it also uses the online mock data solution based on ApiFox. `FastSoyAdmin` provides you with a one-stop admin solution, no additional configuration, and out of the box. It is also a best practice for learning cutting-edge technologies quickly.
+[`FeelyAdmin`](https://github.com/sleep1223/fast-soy-admin) is a clean, elegant, beautiful and powerful admin template, based on the latest technology stack, front-end including Vue3, Vite5, TypeScript, Pinia and UnoCSS, back-end including FastAPI、Pydantic and Tortoise ORM. It has built-in rich theme configuration and components, strict code specifications, and an automated file routing system. In addition, it also uses the online mock data solution based on ApiFox. `FeelyAdmin` provides you with a one-stop admin solution, no additional configuration, and out of the box. It is also a best practice for learning cutting-edge technologies quickly.
 
 
 ## Features

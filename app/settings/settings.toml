@@ -1,12 +1,12 @@
-# FastSoyAdmin 配置文件
+# FeelyAdmin 配置文件
 # 使用 TOML 格式进行配置管理
-# 环境变量前缀: FASTSOYADMIN
+# 环境变量前缀: FeelyAdmin
 
 # 默认配置 - 所有环境的基础配置
 [default]
 # 应用基础配置
 VERSION = "1.0.0"
-APP_TITLE = "FastSoyAdmin"
+APP_TITLE = "FeelyAdmin"
 APP_DESCRIPTION = "FastAPI + Vue3 + TypeScript 后台管理系统"
 DEBUG = false
 

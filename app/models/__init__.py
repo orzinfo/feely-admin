@@ -1,5 +1,5 @@
 """
-FastSoyAdmin 数据模型模块
+FeelyAdmin 数据模型模块
 
 该模块导入所有数据模型，确保 TortoiseORM 能够正确发现和注册模型。
 """

@@ -1,4 +1,4 @@
-"""FastSoyAdmin 配置管理模块
+"""FeelyAdmin 配置管理模块
 
 使用 Dynaconf 进行配置管理，支持多环境配置和动态配置加载。
 配置文件位于 app/settings/ 目录下。
@@ -76,6 +76,8 @@ settings = Dynaconf(
     ],
     environments=True,
     env="development",
+    # 统一设置环境变量前缀，支持使用 FeelyAdmin_* 来覆盖配置
+    envvar_prefix="FeelyAdmin",
     load_dotenv=True,
     merge_enabled=True,
     auto_cast=True,

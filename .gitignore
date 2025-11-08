@@ -9,6 +9,7 @@ venv/
 ai/
 
 # Configuration and secrets files
+.settings.toml
 .secrets.toml
 .env
 .env.local

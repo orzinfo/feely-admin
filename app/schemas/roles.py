@@ -9,7 +9,7 @@ class RoleBase(BaseModel):
     role_name: Annotated[str | None, Field(alias="roleName", title="角色名称")] = None
     role_code: Annotated[str | None, Field(alias="roleCode", title="角色编码")] = None
     role_desc: Annotated[str | None, Field(alias="roleDesc", title="角色描述")] = None
-    by_role_home: Annotated[str | None, Field(alias="byRoleHome", title="角色首页")] = None
+    by_role_home_id: Annotated[int | None, Field(alias="byRoleHomeId", title="角色首页")] = None
     status_type: Annotated[StatusType | None, Field(alias="statusType", title="角色状态")] = None
 
     class Config:

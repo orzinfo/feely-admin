@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body
+from fastapi import APIRouter
 from tortoise.expressions import Q
 
 from app.api.v1.utils import insert_log
@@ -28,11 +28,12 @@ async def _(obj_in: UserSearch):
     if obj_in.by_user_role_code_list:
         q &= Q(by_user_roles__role_code__in=obj_in.by_user_role_code_list)
 
-    total, user_objs = await user_controller.list(page=obj_in.current, page_size=obj_in.size, search=q, order=["id"])
+    total, user_objs = await user_controller.list(
+        page=obj_in.current, page_size=obj_in.size, search=q, order=["id"], prefetch=["by_user_roles"]
+    )
     records = []
     for user_obj in user_objs:
         record = await user_obj.to_dict(exclude_fields=["password"])
-        await user_obj.fetch_related("by_user_roles")
         user_role_code_list = [by_user_role.role_code for by_user_role in user_obj.by_user_roles]
         record.update({"byUserRoleCodeList": user_role_code_list})
         records.append(record)
@@ -61,7 +62,6 @@ async def _(user_in: UserCreate):
         return Success(code="4090", msg="The user must have at least one role that exists.")
 
     new_user = await user_controller.create(obj_in=user_in)
-    await user_controller.update_roles_by_code(new_user, user_in.by_user_role_code_list)
     await insert_log(log_type=LogType.AdminLog, log_detail_type=LogDetailType.UserCreateOne, by_user_id=0)
     return Success(msg="Created Successfully", data={"created_id": new_user.id})
 
@@ -72,7 +72,6 @@ async def _(user_id: int, user_in: UserUpdate):
     if not user_in.by_user_role_code_list:
         return Success(code="4090", msg="The user must have at least one role that exists.")
 
-    await user_controller.update_roles_by_code(user, user_in.by_user_role_code_list)
     await insert_log(log_type=LogType.AdminLog, log_detail_type=LogDetailType.UserUpdateOne, by_user_id=0)
     return Success(msg="Updated Successfully", data={"updated_id": user_id})
 

@@ -38,10 +38,7 @@ async def build_menu_tree(menus: list[Menu], parent_id: int = 0, simple: bool = 
 
 
 @router.get("/menus", summary="查看用户菜单")
-async def _(
-        current: int = Query(1, description="页码"),
-        size: int = Query(100, description="每页数量")
-):
+async def _(current: int = Query(1, description="页码"), size: int = Query(100, description="每页数量")):
     total, menus = await menu_controller.list(page=current, page_size=size, order=["id"])
     # 递归生成菜单
     menu_tree = await build_menu_tree(menus, simple=False)
@@ -70,7 +67,9 @@ async def get_menu(menu_id: int):
 async def _(menu_in: MenuCreate):
     is_exist = await menu_controller.model.exists(route_path=menu_in.route_path)
     if is_exist:
-        return Success(code="4090", msg=f"The menu with this route_path {menu_in.route_path} already exists in the system.")
+        return Success(
+            code="4090", msg=f"The menu with this route_path {menu_in.route_path} already exists in the system."
+        )
 
     if menu_in.active_menu:
         menu_in.active_menu = await menu_controller.get(menu_name=menu_in.active_menu)
@@ -132,14 +131,19 @@ async def build_menu_button_tree(menus: list[Menu], parent_id: int = 0) -> list[
             if children:
                 menu_dict["children"] = children
             else:
-                menu_dict["children"] = [{"id": button.id, "label": button.button_code, "pId": menu.id} for button in await menu.by_menu_buttons]
+                menu_dict["children"] = [
+                    {"id": button.id, "label": button.button_code, "pId": menu.id}
+                    for button in await menu.by_menu_buttons
+                ]
             tree.append(menu_dict)
     return tree
 
 
 @router.get("/menus/buttons/tree/", summary="查看菜单按钮树")
 async def _():
-    menus_with_button = await Menu.filter(constant=False).annotate(button_count=Count('by_menu_buttons')).filter(button_count__gt=0)
+    menus_with_button = (
+        await Menu.filter(constant=False).annotate(button_count=Count("by_menu_buttons")).filter(button_count__gt=0)
+    )
     menu_objs = menus_with_button.copy()
     while len(menus_with_button) > 0:
         menu = menus_with_button.pop()

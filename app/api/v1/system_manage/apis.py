@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Query
-from fastapi.params import Depends
 from tortoise.expressions import Q
 
 from app.api.v1.utils import refresh_api_list, insert_log, generate_tags_recursive_list
@@ -33,7 +32,9 @@ async def _(obj_in: ApiSearch):
     user_role_objs: list[Role] = await user_obj.by_user_roles
     user_role_codes = [role_obj.role_code for role_obj in user_role_objs]
     if "R_SUPER" in user_role_codes:
-        total, api_objs = await api_controller.list(page=obj_in.current, page_size=obj_in.size, search=q, order=["tags", "id"])
+        total, api_objs = await api_controller.list(
+            page=obj_in.current, page_size=obj_in.size, search=q, order=["tags", "id"]
+        )
     else:
         api_objs: list[Api] = []
         for role_obj in user_role_objs:
@@ -79,10 +80,12 @@ def build_api_tree(apis: list[Api]):
                 parent_map[node_id] = node
                 parent_map[parent_id]["children"].append(node)
             parent_id = node_id
-        parent_map[parent_id]["children"].append({
-            "id": api.id,
-            "summary": api.summary,
-        })
+        parent_map[parent_id]["children"].append(
+            {
+                "id": api.id,
+                "summary": api.summary,
+            }
+        )
     return parent_map["root"]["children"]
 
 

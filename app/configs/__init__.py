@@ -24,7 +24,7 @@ __all__ = [
     "APP_SETTINGS",
     "config",
     "get_tortoise_orm_config",
-    "get_database_url", 
+    "get_database_url",
     "get_redis_url",
     "get_current_env",
     "validate_config",

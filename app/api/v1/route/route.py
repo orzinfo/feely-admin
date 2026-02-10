@@ -40,7 +40,7 @@ async def build_route_tree(menus: list[Menu], parent_id: int = 0, simple: bool =
                         "activeMenu": menu.active_menu.route_name if menu.active_menu else None,
                         "multiTab": menu.multi_tab,
                         "fixedIndexInTab": menu.fixed_index_in_tab,
-                    }
+                    },
                 }
                 if menu.icon_type == IconType.local:
                     menu_dict["meta"]["localIcon"] = menu.icon
@@ -77,8 +77,8 @@ async def _():
                 "title": menu_obj.menu_name,
                 "i18nKey": menu_obj.i18n_key,
                 "constant": menu_obj.constant,
-                "hideInMenu": menu_obj.hide_in_menu
-            }
+                "hideInMenu": menu_obj.hide_in_menu,
+            },
         }
 
         if menu_obj.props:

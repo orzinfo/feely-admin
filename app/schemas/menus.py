@@ -56,5 +56,4 @@ class MenuCreate(MenuBase):
     route_path: Annotated[str, Field(max_length=200, alias="routePath", title="路由路径")]
 
 
-class MenuUpdate(MenuBase):
-    ...
+class MenuUpdate(MenuBase): ...

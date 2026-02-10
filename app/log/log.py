@@ -19,27 +19,28 @@ class Logger:
     def __init__(self):
         # 延迟导入配置以避免循环依赖
         from app.configs import APP_SETTINGS
-        
+
         log_name = f"Fast_{time.strftime('%Y-%m-%d', time.localtime()).replace('-', '_')}.log"
         log_path = APP_SETTINGS.LOGS_ROOT / log_name
         self.logger = logger
         self.logger.remove()
         APP_SETTINGS.LOGS_ROOT.mkdir(parents=True, exist_ok=True)
         self.logger.add(sys.stdout)
-        self.logger.add(log_path,
-                        format="{time:YYYY-MM-DD HH:mm:ss} - "
-                               "{process.name} | "
-                               "{thread.name} | "
-                               "<red> {x_request_id} </red> | "
-                               "{module}.{function}:{line} - {level} -{message}",
-                        encoding="utf-8",
-                        retention="3 days",
-                        backtrace=True,
-                        diagnose=True,
-                        enqueue=True,
-                        rotation="00:00",
-                        filter=x_request_id_filter
-                        )
+        self.logger.add(
+            log_path,
+            format="{time:YYYY-MM-DD HH:mm:ss} - "
+            "{process.name} | "
+            "{thread.name} | "
+            "<red> {x_request_id} </red> | "
+            "{module}.{function}:{line} - {level} -{message}",
+            encoding="utf-8",
+            retention="3 days",
+            backtrace=True,
+            diagnose=True,
+            enqueue=True,
+            rotation="00:00",
+            filter=x_request_id_filter,
+        )
 
     @staticmethod
     def init_config():

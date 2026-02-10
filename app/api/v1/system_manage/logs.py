@@ -52,9 +52,14 @@ async def _(log_in: LogSearch):
     user_role_objs: list[Role] = await user_obj.by_user_roles
     user_role_codes = [role_obj.role_code for role_obj in user_role_objs]
 
-    if "R_ADMIN" in user_role_codes and log_in.log_type not in [LogType.ApiLog, LogType.UserLog]:  # 管理员只能查看API日志和用户日志
+    if "R_ADMIN" in user_role_codes and log_in.log_type not in [
+        LogType.ApiLog,
+        LogType.UserLog,
+    ]:  # 管理员只能查看API日志和用户日志
         return Fail(msg="Permission Denied")
-    elif "R_SUPER" not in user_role_codes and "R_ADMIN" not in user_role_codes and log_in.log_type != LogType.ApiLog:  # 非超级管理员和管理员只能查看API日志
+    elif (
+        "R_SUPER" not in user_role_codes and "R_ADMIN" not in user_role_codes and log_in.log_type != LogType.ApiLog
+    ):  # 非超级管理员和管理员只能查看API日志
         return Fail(msg="Permission Denied")
 
     total, log_objs = await log_controller.list(page=log_in.current, page_size=log_in.size, search=q, order=["-id"])

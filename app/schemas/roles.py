@@ -22,8 +22,7 @@ class RoleCreate(RoleBase):
     role_code: Annotated[str, Field(alias="roleCode", title="角色编码")]
 
 
-class RoleUpdate(RoleBase):
-    ...
+class RoleUpdate(RoleBase): ...
 
 
 class RoleUpdateAuthrization(BaseModel):

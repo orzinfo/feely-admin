@@ -14,11 +14,11 @@ router = APIRouter()
 
 @router.get("/roles", summary="查看角色列表")
 async def _(
-        current: int = Query(1, description="页码"),
-        size: int = Query(10, description="每页数量"),
-        roleName: str = Query(None, description="角色名称"),
-        roleCode: str = Query(None, description="角色编码"),
-        status: str = Query(None, description="用户状态")
+    current: int = Query(1, description="页码"),
+    size: int = Query(10, description="每页数量"),
+    roleName: str = Query(None, description="角色名称"),
+    roleCode: str = Query(None, description="角色编码"),
+    status: str = Query(None, description="用户状态"),
 ):
     q = Q()
     if roleName:
@@ -111,7 +111,10 @@ async def _(role_id: int, role_in: RoleUpdateAuthrization):
             await role_obj.by_role_menus.clear()  # 去除所有角色菜单
 
     await insert_log(log_type=LogType.AdminLog, log_detail_type=LogDetailType.RoleUpdateMenus, by_user_id=0)
-    return Success(msg="Updated Successfully", data={"by_role_menu_ids": role_in.by_role_menu_ids, "by_role_home_id": role_in.by_role_home_id})
+    return Success(
+        msg="Updated Successfully",
+        data={"by_role_menu_ids": role_in.by_role_menu_ids, "by_role_home_id": role_in.by_role_home_id},
+    )
 
 
 @router.get("/roles/{role_id}/buttons", summary="查看角色按钮")

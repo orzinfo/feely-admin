@@ -26,5 +26,4 @@ class ApiCreate(BaseApi):
     api_method: Annotated[str, Field(alias="apiMethod", title="请求方法", description="GET")]
 
 
-class ApiUpdate(BaseApi):
-    ...
+class ApiUpdate(BaseApi): ...

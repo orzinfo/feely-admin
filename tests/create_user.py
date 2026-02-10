@@ -27,7 +27,7 @@ async def add_user():
         raise Exception("Role not found")
 
     for _ in range(6):
-        random_str = "r_" + ''.join(random.sample('zyxwvutsrqponmlkjihgfedcba', 5))
+        random_str = "r_" + "".join(random.sample("zyxwvutsrqponmlkjihgfedcba", 5))
         random_phone = f"189{random.randint(9999999, 100000000)}"
         role_super: Role | None = await role_controller.get_by_code("R_SUPER")
         user_create = await user_controller.create(
@@ -36,7 +36,7 @@ async def add_user():
                 user_email=f"{random_str}@user.com",
                 password="123456",
                 user_phone=random_phone,
-                status_type=StatusType.enable
+                status_type=StatusType.enable,
             )
         )
         await user_create.by_user_roles.add(role_super)

@@ -23,7 +23,7 @@ async def add_user():
     menu_objs = await Menu.filter(constant=False)
 
     for _ in range(6):
-        random_str = "u_" + ''.join(random.sample('zyxwvutsrqponmlkjihgfedcba', 5))
+        random_str = "u_" + "".join(random.sample("zyxwvutsrqponmlkjihgfedcba", 5))
         role_admin = await Role.create(role_name=random_str, role_code=random_str, role_desc="test")
         for menu_obj in menu_objs:
             await role_admin.by_role_menus.add(menu_obj)

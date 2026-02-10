@@ -35,7 +35,9 @@ class MenuController(CRUDBase[Menu, MenuCreate, MenuUpdate]):
 
         await menu.by_menu_buttons.clear()
         for button in buttons:
-            button_obj, _ = await Button.update_or_create(button_code=button.button_code, defaults=dict(button_desc=button.button_desc))
+            button_obj, _ = await Button.update_or_create(
+                button_code=button.button_code, defaults=dict(button_desc=button.button_desc)
+            )
             await menu.by_menu_buttons.add(button_obj)
 
         return True

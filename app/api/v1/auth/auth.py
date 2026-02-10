@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone, UTC
+from datetime import datetime, timedelta, UTC
 
 from fastapi import APIRouter
 from fastapi_cache import JsonCoder
@@ -35,7 +35,7 @@ async def _(credentials: CredentialsSchema):
     payload = JWTPayload(
         data={"userId": user_obj.id, "userName": user_obj.user_name, "tokenType": "accessToken"},
         iat=datetime.now(UTC),
-        exp=datetime.now(UTC)
+        exp=datetime.now(UTC),
     )
     access_token_payload = payload.model_copy(deep=True)
     access_token_payload.exp += timedelta(minutes=APP_SETTINGS.JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -73,7 +73,7 @@ async def _(jwt_token: JWTOut):
     payload = JWTPayload(
         data={"userId": user_obj.id, "userName": user_obj.user_name, "tokenType": "accessToken"},
         iat=datetime.now(UTC),
-        exp=datetime.now(UTC)
+        exp=datetime.now(UTC),
     )
 
     access_token_payload = payload.model_copy(deep=True)
@@ -86,7 +86,9 @@ async def _(jwt_token: JWTOut):
         access_token=create_access_token(data=access_token_payload),
         refresh_token=create_access_token(data=refresh_token_payload),
     )
-    await insert_log(log_type=LogType.UserLog, log_detail_type=LogDetailType.UserAuthRefreshTokenSuccess, by_user_id=user_obj.id)
+    await insert_log(
+        log_type=LogType.UserLog, log_detail_type=LogDetailType.UserAuthRefreshTokenSuccess, by_user_id=user_obj.id
+    )
     return Success(data=data.model_dump(by_alias=True))
 
 
@@ -100,16 +102,18 @@ async def _():
     user_roles: list[Role] = await user_obj.by_user_roles
     user_role_codes = [user_role.role_code for user_role in user_roles]
 
-    user_role_button_codes = [b.button_code for b in await Button.all()] if "R_SUPER" in user_role_codes else [b.button_code for user_role in user_roles for b in await user_role.by_role_buttons]
+    user_role_button_codes = (
+        [b.button_code for b in await Button.all()]
+        if "R_SUPER" in user_role_codes
+        else [b.button_code for user_role in user_roles for b in await user_role.by_role_buttons]
+    )
 
     user_role_button_codes = list(set(user_role_button_codes))
 
-    data.update({
-        "userId": user_id,
-        "roles": user_role_codes,
-        "buttons": user_role_button_codes
-    })
-    await insert_log(log_type=LogType.UserLog, log_detail_type=LogDetailType.UserLoginGetUserInfo, by_user_id=user_obj.id)
+    data.update({"userId": user_id, "roles": user_role_codes, "buttons": user_role_button_codes})
+    await insert_log(
+        log_type=LogType.UserLog, log_detail_type=LogDetailType.UserLoginGetUserInfo, by_user_id=user_obj.id
+    )
     return Success(data=data)
 
 

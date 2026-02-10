@@ -1,4 +1,4 @@
-from typing import Annotated, Optional
+from typing import Annotated
 
 from pydantic import BaseModel, Field
 
@@ -15,7 +15,9 @@ class UserBase(BaseModel):
     user_phone: Annotated[str | None, Field(alias="userPhone", title="手机号")] = None
     status_type: Annotated[StatusType | None, Field(alias="statusType", title="用户状态")] = None
 
-    by_user_role_code_list: Annotated[list[str] | None, Field(alias="byUserRoleCodeList", title="用户角色编码列表")] = None
+    by_user_role_code_list: Annotated[list[str] | None, Field(alias="byUserRoleCodeList", title="用户角色编码列表")] = (
+        None
+    )
 
     class Config:
         populate_by_name = True
@@ -26,8 +28,7 @@ class UserSearch(UserBase):
     size: Annotated[int | None, Field(description="每页数量")] = 10
 
 
-class UserCreate(UserBase):
-    ...
+class UserCreate(UserBase): ...
 
 
 class UserUpdate(UserBase):

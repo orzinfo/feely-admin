@@ -11,7 +11,7 @@ from app.utils.tools import to_lower_camel_case
 
 class BaseModel(models.Model):
     async def to_dict(
-            self, include_fields: list[str] | None = None, exclude_fields: list[str] | None = None, m2m: bool = False
+        self, include_fields: list[str] | None = None, exclude_fields: list[str] | None = None, m2m: bool = False
     ):
         include_fields = include_fields or []
         exclude_fields = exclude_fields or []
@@ -34,7 +34,7 @@ class BaseModel(models.Model):
         if m2m:
             for field in self._meta.m2m_fields:
                 if (not include_fields or field in include_fields) and (
-                        not exclude_fields or field not in exclude_fields
+                    not exclude_fields or field not in exclude_fields
                 ):
                     values = [value for value in await getattr(self, field).all().values()]
                     for value in values:
@@ -77,12 +77,10 @@ class EnumBase(Enum):
                 return item.name
 
 
-class IntEnum(int, EnumBase):
-    ...
+class IntEnum(int, EnumBase): ...
 
 
-class StrEnum(str, EnumBase):
-    ...
+class StrEnum(str, EnumBase): ...
 
 
 class MethodType(str, Enum):
@@ -110,6 +108,7 @@ class LogDetailType(str, Enum):
     1500-1599 角色
     1600-1699 用户
     """
+
     SystemStart = "1101"
     SystemStop = "1102"
 
@@ -198,5 +197,5 @@ __all__ = [
     "StatusType",
     "GenderType",
     "MenuType",
-    "IconType"
+    "IconType",
 ]

@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 from functools import lru_cache
 
 import jwt
@@ -38,24 +38,24 @@ def check_token(token: str) -> tuple[bool, int, Any]:
 
 class AuthControl:
     """认证控制器"""
-    
+
     @classmethod
     async def is_authed(cls, token: str = Depends(oauth2_schema)) -> User:
         """
         验证用户认证状态
-        
+
         Args:
             token: JWT token
-            
+
         Returns:
             User: 认证用户对象
-            
+
         Raises:
             HTTPException: 认证失败时抛出异常
         """
         if not token:
             raise HTTPException(code="4001", msg="Authentication failed, token does not exists in the request.")
-        
+
         # 从上下文获取用户ID（如果已设置）
         user_id = CTX_USER_ID.get()
         if user_id == 0:
@@ -72,22 +72,21 @@ class AuthControl:
         user = await User.filter(id=user_id).first()
         if not user:
             raise HTTPException(
-                code="4040", 
-                msg=f"Authentication failed, the user_id: {user_id} does not exists in the system."
+                code="4040", msg=f"Authentication failed, the user_id: {user_id} does not exists in the system."
             )
-        
+
         # 设置上下文用户ID
         CTX_USER_ID.set(int(user_id))
         return user
 
     @classmethod
-    async def get_current_user_optional(cls, token: str = Depends(oauth2_schema)) -> Optional[User]:
+    async def get_current_user_optional(cls, token: str = Depends(oauth2_schema)) -> User | None:
         """
         获取当前用户（可选）
-        
+
         Args:
             token: JWT token
-            
+
         Returns:
             Optional[User]: 用户对象或None
         """
@@ -99,23 +98,23 @@ class AuthControl:
 
 class PermissionControl:
     """权限控制器"""
-    
+
     @classmethod
     async def has_permission(cls, request: Request, current_user: User = Depends(AuthControl.is_authed)) -> None:
         """
         检查用户权限
-        
+
         Args:
             request: FastAPI请求对象
             current_user: 当前认证用户
-            
+
         Raises:
             HTTPException: 权限不足时抛出异常
         """
         # 预加载用户角色
         await current_user.fetch_related("by_user_roles")
         user_roles_codes: list[str] = [r.role_code for r in current_user.by_user_roles]
-        
+
         # 超级管理员直接通过
         if "R_SUPER" in user_roles_codes:
             return
@@ -128,19 +127,13 @@ class PermissionControl:
 
         # 获取用户所有API权限
         apis = [await role.by_role_apis for role in current_user.by_user_roles]
-        permission_apis = list(set(
-            (api.api_method.value, api.api_path, api.status_type) 
-            for api in sum(apis, [])
-        ))
-        
+        permission_apis = list(set((api.api_method.value, api.api_path, api.status_type) for api in sum(apis, [])))
+
         # 检查权限
-        for (api_method, api_path, api_status) in permission_apis:
+        for api_method, api_path, api_status in permission_apis:
             if api_method == method and check_url(api_path, request.url.path):
                 if api_status == StatusType.disable:
-                    raise HTTPException(
-                        code="4031", 
-                        msg=f"The API has been disabled, method: {method} path: {path}"
-                    )
+                    raise HTTPException(code="4031", msg=f"The API has been disabled, method: {method} path: {path}")
                 return
 
         # 权限检查失败，记录日志

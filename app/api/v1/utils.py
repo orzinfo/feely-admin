@@ -63,4 +63,6 @@ async def insert_log(log_type: LogType, log_detail_type: LogDetailType, by_user_
     if by_user_id == 0 and (by_user_id := CTX_USER_ID.get()) == 0:
         by_user_id = None
 
-    await Log.create(log_type=log_type, log_detail_type=log_detail_type, by_user_id=by_user_id, x_request_id=CTX_X_REQUEST_ID.get())
+    await Log.create(
+        log_type=log_type, log_detail_type=log_detail_type, by_user_id=by_user_id, x_request_id=CTX_X_REQUEST_ID.get()
+    )

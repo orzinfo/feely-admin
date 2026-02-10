@@ -34,14 +34,15 @@ class CRUDBase[ModelType: Model, CreateSchemaType: BaseModel, UpdateSchemaType: 
         return await self.model.get(*args, **kwargs)
 
     async def list(
-            self,
-            page: int | None,
-            page_size: int | None,
-            search: Q = Q(),
-            order: list[str] | None = None,
-            fields: list[str] | None = None,
-            last_id: int | None = None,
-            count_by_pk_field: bool = False
+        self,
+        page: int | None,
+        page_size: int | None,
+        search: Q = Q(),
+        order: list[str] | None = None,
+        fields: list[str] | None = None,
+        last_id: int | None = None,
+        count_by_pk_field: bool = False,
+        prefetch: list[str] | None = None,
     ) -> tuple[Total, list[ModelType]]:
         """
         分页查询模型列表，支持搜索、排序与字段裁剪。
@@ -54,6 +55,7 @@ class CRUDBase[ModelType: Model, CreateSchemaType: BaseModel, UpdateSchemaType: 
         - fields: 仅返回的字段列表，减少载荷。
         - last_id: 若提供则按增量方式拉取大于该ID的数据。
         - count_by_pk_field: 是否按主键去重计数（针对 distinct 复杂场景）。
+        - prefetch: 需要预加载的关联字段列表。
 
         返回:
         - (Total, list[ModelType]): 总数与当前页数据列表。
@@ -63,6 +65,9 @@ class CRUDBase[ModelType: Model, CreateSchemaType: BaseModel, UpdateSchemaType: 
         page_size = page_size or 10
 
         query = self.model.filter(search).distinct()
+        if prefetch:
+            query = query.prefetch_related(*prefetch)
+
         if last_id:
             query = query.filter(id__gt=last_id)
 
@@ -101,7 +106,9 @@ class CRUDBase[ModelType: Model, CreateSchemaType: BaseModel, UpdateSchemaType: 
         await obj.save()
         return obj
 
-    async def update(self, id: int, obj_in: UpdateSchemaType | dict[str, Any], exclude: set[str] | None = None) -> ModelType:
+    async def update(
+        self, id: int, obj_in: UpdateSchemaType | dict[str, Any], exclude: set[str] | None = None
+    ) -> ModelType:
         """
         更新指定 ID 的模型实例，支持 Pydantic 模型或字典输入。
 

@@ -44,12 +44,10 @@ class LogSearch(BaseLog):
     x_request_id: Annotated[str | None, Field(alias="xRequestId", description="x-request-id")] = None
 
 
-class LogCreate(BaseLog):
-    ...
+class LogCreate(BaseLog): ...
 
 
-class LogUpdate(BaseLog):
-    ...
+class LogUpdate(BaseLog): ...
 
 
 __all__ = ["BaseLog", "BaseAPILog", "LogSearch", "LogCreate", "LogUpdate"]

@@ -11,12 +11,12 @@ api_router = APIRouter(
 
 # 包含v1版本路由
 api_router.include_router(
-    v1_router, 
-    prefix="/v1", 
+    v1_router,
+    prefix="/v1",
     tags=["API v1"],
     responses={
         400: {"description": "Bad request"},
         401: {"description": "Unauthorized"},
         403: {"description": "Forbidden"},
-    }
+    },
 )

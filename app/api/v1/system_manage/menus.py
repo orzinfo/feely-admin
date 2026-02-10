@@ -5,7 +5,7 @@ from app.api.v1.utils import insert_log
 from app.controllers.menu import menu_controller
 from app.models.system import LogType, LogDetailType, IconType
 from app.models.system import Menu
-from app.schemas.base import Success, SuccessExtra
+from app.schemas.base import Success, SuccessExtra, CommonIds
 from app.schemas.menus import MenuCreate, MenuUpdate
 
 router = APIRouter()
@@ -98,13 +98,15 @@ async def _(menu_id: int):
 
 
 @router.delete("/menus", summary="批量删除菜单")
-async def _(ids: str = Query(description="菜单ID列表, 用逗号隔开")):
-    menu_ids = ids.split(",")
-    for menu_id in menu_ids:
-        menu_obj = await Menu.get(id=int(menu_id))
-        await menu_obj.delete()
+async def _(obj_in: CommonIds):
+    deleted_ids = []
+    if obj_in.ids:
+        # 使用批量删除优化性能
+        await menu_controller.model.filter(id__in=obj_in.ids).delete()
+        deleted_ids = obj_in.ids
+
     await insert_log(log_type=LogType.AdminLog, log_detail_type=LogDetailType.MenuBatchDeleteOne, by_user_id=0)
-    return Success(msg="Deleted Successfully", data={"deleted_ids": menu_ids})
+    return Success(msg="Deleted Successfully", data={"deleted_ids": deleted_ids})
 
 
 @router.get("/menus/pages/", summary="查看一级菜单")

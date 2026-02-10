@@ -1,6 +1,4 @@
 from fastapi import APIRouter
-from fastapi_cache import JsonCoder
-from fastapi_cache.decorator import cache
 
 from app.controllers.menu import menu_controller
 from app.core.ctx import CTX_USER_ID
@@ -23,7 +21,6 @@ async def build_route_tree(menus: list[Menu], parent_id: int = 0, simple: bool =
     for menu in menus:
         if menu.parent_id == parent_id:
             children = await build_route_tree(menus, menu.id, simple)
-            await menu.fetch_related("active_menu")
             if simple:
                 menu_dict = {
                     "name": menu.route_name,
@@ -59,7 +56,6 @@ async def build_route_tree(menus: list[Menu], parent_id: int = 0, simple: bool =
     return tree
 
 
-@cache(expire=60, coder=JsonCoder)
 @router.get("/constant-routes", summary="查看常量路由(公共路由)")
 async def _():
     """
@@ -89,7 +85,6 @@ async def _():
     return Success(data=data)
 
 
-@cache(expire=60, coder=JsonCoder)
 @router.get("/user-routes", summary="查看用户路由菜单", dependencies=[DependAuth])
 async def _():
     """
@@ -97,8 +92,16 @@ async def _():
     :return:
     """
     user_id = CTX_USER_ID.get()
-    user_obj = await User.get(id=user_id).prefetch_related("by_user_roles")
+    user_obj = await User.get(id=user_id).prefetch_related(
+        "by_user_roles",
+        "by_user_roles__by_role_menus",
+        "by_user_roles__by_role_menus__active_menu",
+    )
     user_roles: list[Role] = await user_obj.by_user_roles
+
+    role_ids = [r.id for r in user_roles]
+    roles_with_home = await Role.filter(id__in=role_ids).select_related("by_role_home")
+    role_home_by_id = {r.id: r.by_role_home for r in roles_with_home}
 
     is_super = False
     role_home: str = "home"
@@ -106,33 +109,33 @@ async def _():
         if user_role.role_code == "R_SUPER":
             is_super = True
 
-        role_home_obj = await user_role.by_role_home.first()
+        role_home_obj = role_home_by_id.get(user_role.id)
         if role_home_obj:
             role_home = role_home_obj.route_name
             # break  # 注释掉, 取最后一个角色的首页
 
     if is_super:
-        role_routes: list[Menu] = await Menu.filter(constant=False)
+        role_routes: list[Menu] = await Menu.filter(constant=False).prefetch_related("active_menu")
     else:
-        role_routes: list[Menu] = []
+        role_routes_by_id: dict[int, Menu] = {}
         for user_role in user_roles:
-            await user_role.fetch_related("by_role_menus", "by_role_menus__active_menu")
             user_role_routes: list[Menu] = await user_role.by_role_menus
             for user_role_route in user_role_routes:
                 if not user_role_route.constant or user_role_route.hide_in_menu:
-                    role_routes.append(user_role_route)
+                    role_routes_by_id[user_role_route.id] = user_role_route
 
-        menu_objs = role_routes.copy()
-        while len(menu_objs) > 0:
-            menu = menu_objs.pop()
-            if menu.parent_id != 0:
-                menu = await Menu.get(id=menu.parent_id)
-                menu_objs.append(menu)
-            else:
-                role_routes.append(menu)
+        pending_parent_ids = {m.parent_id for m in role_routes_by_id.values() if m.parent_id}
+        while pending_parent_ids:
+            missing_parent_ids = {pid for pid in pending_parent_ids if pid and pid not in role_routes_by_id}
+            if not missing_parent_ids:
+                break
+            parent_menus = await Menu.filter(id__in=list(missing_parent_ids)).prefetch_related("active_menu")
+            for parent_menu in parent_menus:
+                role_routes_by_id[parent_menu.id] = parent_menu
+            pending_parent_ids = {m.parent_id for m in parent_menus if m.parent_id}
 
-    role_routes = list(set(role_routes))  # 去重
-    # 递归生成菜单
+        role_routes = list(role_routes_by_id.values())
+
     menu_tree = await build_route_tree(role_routes, simple=True)
     data = {"home": role_home, "routes": menu_tree}
     return Success(data=data)

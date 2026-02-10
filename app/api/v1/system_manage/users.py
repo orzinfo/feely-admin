@@ -12,25 +12,7 @@ router = APIRouter()
 
 @router.post("/users/all/", summary="查看用户列表")
 async def _(obj_in: UserSearch):
-    q = Q()
-    if obj_in.user_name:
-        q &= Q(user_name__contains=obj_in.user_name)
-    if obj_in.user_gender:
-        q &= Q(user_gender=obj_in.user_gender)
-    if obj_in.nick_name:
-        q &= Q(nick_name__contains=obj_in.nick_name)
-    if obj_in.user_phone:
-        q &= Q(user_phone__contains=obj_in.user_phone)
-    if obj_in.user_email:
-        q &= Q(user_email__contains=obj_in.user_email)
-    if obj_in.status_type:
-        q &= Q(status_type=obj_in.status_type)
-    if obj_in.by_user_role_code_list:
-        q &= Q(by_user_roles__role_code__in=obj_in.by_user_role_code_list)
-
-    total, user_objs = await user_controller.list(
-        page=obj_in.current, page_size=obj_in.size, search=q, order=["id"], prefetch=["by_user_roles"]
-    )
+    total, user_objs = await user_controller.search(obj_in)
     records = []
     for user_obj in user_objs:
         record = await user_obj.to_dict(exclude_fields=["password"])
@@ -86,10 +68,10 @@ async def _(user_id: int):
 @router.delete("/users", summary="批量删除用户")
 async def _(obj_in: CommonIds):
     deleted_ids = []
-    for user_id in obj_in.ids:
-        user_obj = await user_controller.get(id=int(user_id))
-        await user_obj.delete()
-        deleted_ids.append(int(user_id))
+    if obj_in.ids:
+        # 使用批量删除优化性能
+        await user_controller.model.filter(id__in=obj_in.ids).delete()
+        deleted_ids = obj_in.ids
 
     await insert_log(log_type=LogType.AdminLog, log_detail_type=LogDetailType.UserBatchDeleteOne, by_user_id=0)
     return Success(msg="Deleted Successfully", data={"deleted_ids": deleted_ids})

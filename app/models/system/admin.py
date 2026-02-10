@@ -96,9 +96,9 @@ class Menu(BaseModel, TimestampMixin):
 
     path_param = fields.CharField(null=True, max_length=200, description="路径参数")
     route_param = fields.JSONField(null=True, description="路由参数, List[dict]")
-    order = fields.IntField(default=0, description="菜单顺序")
+    order = fields.IntField(default=0, description="菜单顺序", index=True)
     component = fields.CharField(null=True, max_length=100, description="路由组件")
-    parent_id = fields.IntField(default=0, max_length=10, description="父菜单ID")
+    parent_id = fields.IntField(default=0, max_length=10, description="父菜单ID", index=True)
     i18n_key = fields.CharField(null=True, max_length=100, description="用于国际化的展示文本，优先级高于title")
     icon = fields.CharField(null=True, max_length=100, description="图标名称")
     icon_type = fields.CharEnumField(IconType, null=True, description="图标类型")
@@ -123,11 +123,16 @@ class Menu(BaseModel, TimestampMixin):
     class Meta:
         table = "menus"
         table_description = "菜单表"
+        indexes = [
+            ("status_type",),
+            ("route_name",),
+            ("route_path",),
+        ]
 
 
 class Button(BaseModel, TimestampMixin):
     id = fields.IntField(pk=True, description="按钮id")
-    button_code = fields.CharField(max_length=200, description="按钮编码")
+    button_code = fields.CharField(max_length=200, description="按钮编码", index=True)
     button_desc = fields.CharField(max_length=200, description="按钮描述")
     status_type = fields.CharEnumField(enum_type=StatusType, default=StatusType.enable, description="状态")
 

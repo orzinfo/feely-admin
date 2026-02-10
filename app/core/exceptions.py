@@ -74,12 +74,23 @@ async def IntegrityHandle(req: Request, exc: Exception) -> JSONResponse:
 
 
 async def HttpExcHandle(req: Request, exc: HTTPException) -> JSONResponse:
-    return await BaseHandle(req, exc, HTTPException, exc.code, exc.msg, 200)
+    # 尝试将错误码转换为 HTTP 状态码，如果不是有效的 HTTP 状态码，则默认返回 400 Bad Request
+    status_code = 400
+    if isinstance(exc.code, int):
+        status_code = exc.code
+    elif isinstance(exc.code, str) and exc.code.isdigit():
+        status_code = int(exc.code)
+
+    # 确保状态码在有效范围内 (100-599)
+    if not (100 <= status_code <= 599):
+        status_code = 400
+
+    return await BaseHandle(req, exc, HTTPException, exc.code, exc.msg, status_code)
 
 
 async def RequestValidationHandle(req: Request, exc: RequestValidationError) -> JSONResponse:
-    return await BaseHandle(req, exc, RequestValidationError, 422, "RequestValidationError", detail=exc.errors())
+    return await BaseHandle(req, exc, RequestValidationError, 422, "RequestValidationError", status_code=422, detail=exc.errors())
 
 
 async def ResponseValidationHandle(req: Request, exc: ResponseValidationError) -> JSONResponse:
-    return await BaseHandle(req, exc, ResponseValidationError, 422, "ResponseValidationError", detail=exc.errors())
+    return await BaseHandle(req, exc, ResponseValidationError, 422, "ResponseValidationError", status_code=422, detail=exc.errors())

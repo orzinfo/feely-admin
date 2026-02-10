@@ -16,6 +16,7 @@ from app.core.exceptions import HTTPException
 from app.models.system import LogType
 from app.models.system import User, Log, APILog
 from app.configs import APP_SETTINGS
+from app.log import log
 
 
 class SimpleBaseMiddleware:
@@ -63,16 +64,14 @@ class BackGroundTaskMiddleware(SimpleBaseMiddleware):
         try:
             await BgTasks.init_bg_tasks_obj()
         except Exception as e:
-            # 记录错误但不阻止请求继续
-            print(f"Failed to initialize background tasks: {e}")
+            log.warning(f"Failed to initialize background tasks: {e!r}")
         return None
 
     async def after_request(self, request: Request, message: dict[str, Any]) -> None:
         try:
             await BgTasks.execute_tasks()
         except Exception as e:
-            # 记录错误但不影响响应
-            print(f"Failed to execute background tasks: {e}")
+            log.warning(f"Failed to execute background tasks: {e!r}")
 
 
 class APILoggerMiddleware(BaseHTTPMiddleware):
@@ -84,6 +83,11 @@ class APILoggerMiddleware(BaseHTTPMiddleware):
     def __init__(self, app: ASGIApp):
         super().__init__(app)
         self.excluded_paths = {"/health", "/metrics", "/favicon.ico"}
+        self.sensitive_path_prefixes = (
+            "/api/v1/auth/login",
+            "/api/v1/auth/refresh-token",
+        )
+        self.max_body_bytes = 32 * 1024
 
     async def dispatch(self, request: Request, call_next) -> Response:
         # 设置请求开始时间和ID
@@ -105,8 +109,7 @@ class APILoggerMiddleware(BaseHTTPMiddleware):
             try:
                 await self._create_api_log(request, x_request_id)
             except Exception as e:
-                # 日志记录失败不应该影响请求处理
-                print(f"Failed to create API log: {e}")
+                log.warning(f"Failed to create API log: {e!r}")
 
         response = await call_next(request)
         return response
@@ -131,9 +134,34 @@ class APILoggerMiddleware(BaseHTTPMiddleware):
                 user_id = int(decode_data["data"]["userId"])
                 CTX_USER_ID.set(user_id)
                 return user_id
-        except Exception:
-            pass
+        except Exception as e:
+            # 记录异常，但不阻断请求
+            from loguru import logger
+            logger.warning(f"Failed to decode token in middleware: {e}")
         return None
+
+    def _is_sensitive_path(self, path: str) -> bool:
+        return path.startswith(self.sensitive_path_prefixes)
+
+    def _sanitize(self, obj: Any) -> Any:
+        if isinstance(obj, dict):
+            redacted_keys = {
+                "password",
+                "token",
+                "refreshToken",
+                "refresh_token",
+                "accessToken",
+                "access_token",
+                "authorization",
+                "cookie",
+            }
+            return {
+                k: ("***" if k in redacted_keys else self._sanitize(v))
+                for k, v in obj.items()
+            }
+        if isinstance(obj, list):
+            return [self._sanitize(v) for v in obj]
+        return obj
 
     async def _get_request_data(self, request: Request) -> dict[str, Any] | None:
         """安全地获取请求数据"""
@@ -141,8 +169,20 @@ class APILoggerMiddleware(BaseHTTPMiddleware):
             return None
 
         try:
-            return await request.json()
-        except (JSONDecodeError, UnicodeDecodeError, ValueError):
+            if self._is_sensitive_path(request.url.path):
+                return None
+
+            raw_body = await request.body()
+            if not raw_body:
+                return None
+            if len(raw_body) > self.max_body_bytes:
+                return {"_truncated": True, "len": len(raw_body)}
+
+            data = orjson.loads(raw_body)
+            if isinstance(data, dict):
+                return self._sanitize(data)
+            return {"_non_dict": True}
+        except (JSONDecodeError, orjson.JSONDecodeError, UnicodeDecodeError, ValueError):
             return None
 
     async def _create_api_log(self, request: Request, x_request_id: str) -> None:
@@ -203,25 +243,35 @@ class APILoggerAddResponseMiddleware(SimpleBaseMiddleware):
             if not response_body:
                 return
 
-            # 解析响应数据
-            try:
-                resp_data = orjson.loads(response_body)
-            except (orjson.JSONDecodeError, UnicodeDecodeError):
-                return
+            process_time = None
+            if hasattr(request.state, "start_time"):
+                process_time = (datetime.now() - request.state.start_time).total_seconds()
 
-            # 更新API日志
-            api_log_obj = await APILog.get(id=request.state.api_log_id)
-            if api_log_obj:
-                api_log_obj.response_data = resp_data
-                api_log_obj.response_code = resp_data.get("code", "-1")
+            response_code = "-1"
+            response_data: Any | None = None
 
-                # 计算处理时间
-                if hasattr(request.state, "start_time"):
-                    process_time = (datetime.now() - request.state.start_time).total_seconds()
-                    api_log_obj.process_time = process_time
+            is_sensitive = request.url.path.startswith(("/api/v1/auth/login", "/api/v1/auth/refresh-token"))
+            if not is_sensitive and len(response_body) <= 32 * 1024:
+                try:
+                    resp_data = orjson.loads(response_body)
+                except (orjson.JSONDecodeError, UnicodeDecodeError):
+                    resp_data = None
 
-                await api_log_obj.save()
+                if isinstance(resp_data, dict):
+                    response_code = str(resp_data.get("code", "-1"))
+                    redacted = {
+                        k: ("***" if k in {"token", "refreshToken", "access_token", "refresh_token"} else v)
+                        for k, v in resp_data.items()
+                    }
+                    response_data = redacted
+            elif not is_sensitive:
+                response_data = {"_truncated": True, "len": len(response_body)}
+
+            update_data: dict[str, Any] = {"response_code": response_code, "response_data": response_data}
+            if process_time is not None:
+                update_data["process_time"] = process_time
+
+            await APILog.filter(id=request.state.api_log_id).update(**update_data)
 
         except Exception as e:
-            # 记录错误但不影响响应
-            print(f"Failed to update response log: {e}")
+            log.warning(f"Failed to update response log: {e!r}")

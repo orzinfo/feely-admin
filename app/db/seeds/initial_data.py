@@ -3,6 +3,7 @@ from tortoise.exceptions import MultipleObjectsReturned
 from app.controllers import role_controller
 from app.controllers.user import UserCreate, user_controller
 from app.core.exceptions import DoesNotExist
+from app.log import log
 from app.models.system import Api, Button, Menu, Role, User
 from app.models.system import IconType, MenuType, StatusType
 
@@ -934,7 +935,7 @@ async def insert_role(
                 api_obj: Api = await Api.get(api_method=api_method, api_path=api_path)
                 await role_obj.by_role_apis.add(api_obj)
             except DoesNotExist:
-                print("不存在API", api_method, api_path)
+                log.warning(f"不存在API {api_method} {api_path}")
                 return False
 
         for route_name in role_menus:
@@ -942,7 +943,7 @@ async def insert_role(
                 menu_obj: Menu = await Menu.get(route_name=route_name)
                 await role_obj.by_role_menus.add(menu_obj)
             except MultipleObjectsReturned:
-                print("多个菜单", route_name)
+                log.warning(f"多个菜单 {route_name}")
                 return False
 
         for button_code in role_buttons:

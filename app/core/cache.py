@@ -189,18 +189,19 @@ class CacheManager:
             raise RuntimeError("Redis not initialized")
 
         try:
-            keys = await self.redis.keys(pattern)
-            if keys:
-                deleted_count = await self.redis.delete(*keys)
-                logger.info(f"Cleared {deleted_count} cache keys matching pattern: {pattern}")
-                return {"status": "success", "deleted_count": deleted_count, "pattern": pattern}
-            else:
-                return {
-                    "status": "success",
-                    "deleted_count": 0,
-                    "pattern": pattern,
-                    "message": "No keys found matching pattern",
-                }
+            deleted_count = 0
+            batch: list[str] = []
+            async for key in self.redis.scan_iter(match=pattern, count=1000):
+                batch.append(key)
+                if len(batch) >= 500:
+                    deleted_count += await self.redis.delete(*batch)
+                    batch.clear()
+
+            if batch:
+                deleted_count += await self.redis.delete(*batch)
+
+            logger.info(f"Cleared {deleted_count} cache keys matching pattern: {pattern}")
+            return {"status": "success", "deleted_count": deleted_count, "pattern": pattern}
         except Exception as e:
             logger.error(f"Failed to clear cache: {e}")
             return {"status": "error", "message": str(e), "pattern": pattern}

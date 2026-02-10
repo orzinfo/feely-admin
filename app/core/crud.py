@@ -43,6 +43,7 @@ class CRUDBase[ModelType: Model, CreateSchemaType: BaseModel, UpdateSchemaType: 
         last_id: int | None = None,
         count_by_pk_field: bool = False,
         prefetch: list[str] | None = None,
+        distinct: bool = False,
     ) -> tuple[Total, list[ModelType]]:
         """
         分页查询模型列表，支持搜索、排序与字段裁剪。
@@ -56,6 +57,7 @@ class CRUDBase[ModelType: Model, CreateSchemaType: BaseModel, UpdateSchemaType: 
         - last_id: 若提供则按增量方式拉取大于该ID的数据。
         - count_by_pk_field: 是否按主键去重计数（针对 distinct 复杂场景）。
         - prefetch: 需要预加载的关联字段列表。
+        - distinct: 是否执行 distinct 去重（默认 False，避免 JSON 字段排序警告及性能损耗）。
 
         返回:
         - (Total, list[ModelType]): 总数与当前页数据列表。
@@ -64,7 +66,10 @@ class CRUDBase[ModelType: Model, CreateSchemaType: BaseModel, UpdateSchemaType: 
         page = page or 1
         page_size = page_size or 10
 
-        query = self.model.filter(search).distinct()
+        query = self.model.filter(search)
+        if distinct:
+            query = query.distinct()
+        
         if prefetch:
             query = query.prefetch_related(*prefetch)
 

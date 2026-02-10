@@ -1,8 +1,6 @@
 from datetime import datetime, timedelta, UTC
 
 from fastapi import APIRouter
-from fastapi_cache import JsonCoder
-from fastapi_cache.decorator import cache
 
 from app.log import log
 from app.api.v1.utils import insert_log
@@ -84,11 +82,11 @@ async def _(jwt_token: JWTOut):
     return Success(data=data.model_dump(by_alias=True))
 
 
-@cache(expire=60, coder=JsonCoder)
 @router.get("/user-info", summary="查看用户信息", dependencies=[DependAuth])
 async def _():
     user_id = CTX_USER_ID.get()
     user_obj: User = await user_controller.get(id=user_id)
+    await user_obj.fetch_related("by_user_roles", "by_user_roles__by_role_buttons")
     data = await user_obj.to_dict(exclude_fields=["id", "password", "create_time", "update_time"])
 
     user_roles: list[Role] = await user_obj.by_user_roles
@@ -97,7 +95,7 @@ async def _():
     user_role_button_codes = (
         [b.button_code for b in await Button.all()]
         if "R_SUPER" in user_role_codes
-        else [b.button_code for user_role in user_roles for b in await user_role.by_role_buttons]
+        else [b.button_code for user_role in user_roles for b in user_role.by_role_buttons]
     )
 
     user_role_button_codes = list(set(user_role_button_codes))

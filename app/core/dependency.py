@@ -1,5 +1,4 @@
 from typing import Any
-from functools import lru_cache
 
 import jwt
 from fastapi import Depends, Request
@@ -13,7 +12,7 @@ from app.configs import APP_SETTINGS
 from app.utils.tools import check_url
 
 # OAuth2 认证方案
-oauth2_schema = OAuth2PasswordBearer(tokenUrl="/auth/token", auto_error=False)
+oauth2_schema = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login", auto_error=False)
 
 
 def _decode_token(token: str, secret_key: str, algorithm: str) -> tuple[bool, int, Any]:

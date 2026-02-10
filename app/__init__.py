@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 from datetime import datetime
 from collections.abc import AsyncGenerator
+import hashlib
 
 from fastapi import FastAPI
 from fastapi_cache import FastAPICache
@@ -26,7 +27,7 @@ from app.models.system import Log
 from app.models.system import LogType, LogDetailType
 
 try:
-    from app.configs import APP_SETTINGS, get_current_env
+    from app.configs import APP_SETTINGS, get_current_env, validate_config
 except ImportError:
     raise SettingNotFound("Can not import settings")
 
@@ -43,22 +44,31 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     try:
         current_env = get_current_env()
         log.info(f"Starting {app.title} v{app.version} ({current_env} environment)")
+        validate_config()
 
-        # 初始化数据库
-        await modify_db()
-        log.info("Database initialization completed")
+        if current_env == "production":
+            secret_key = str(APP_SETTINGS.SECRET_KEY or "")
+            if secret_key == "your-secret-key-here-change-in-production" or len(secret_key) < 32:
+                raise RuntimeError("Invalid SECRET_KEY for production environment")
 
-        # 初始化菜单
-        await init_menus()
-        log.info("Menu initialization completed")
+            db_password = str(getattr(APP_SETTINGS.DATABASE, "password", "") or "")
+            if not db_password:
+                raise RuntimeError("Empty database password is not allowed in production environment")
 
-        # 刷新API列表
-        await refresh_api_list()
-        log.info("API list refresh completed")
+        if current_env != "production":
+            await modify_db()
+            log.info("Database initialization completed")
 
-        # 初始化用户
-        await init_users()
-        log.info("User initialization completed")
+            await init_menus()
+            log.info("Menu initialization completed")
+
+            await refresh_api_list()
+            log.info("API list refresh completed")
+
+            await init_users()
+            log.info("User initialization completed")
+        else:
+            log.info("Skip database migration and seed tasks in production environment")
 
         # 初始化缓存管理器
         try:
@@ -140,7 +150,7 @@ def create_app() -> FastAPI:
 
     # 添加中间件
     middlewares = make_middlewares()
-    for middleware in middlewares:
+    for middleware in reversed(middlewares):
         _app.add_middleware(middleware.cls, **middleware.kwargs)
 
     # 注册组件
@@ -182,13 +192,14 @@ def _init_cache() -> None:
             prefix="fastapi-cache",
             expire=300,  # 默认5分钟过期
             key_builder=lambda func, namespace, request, response, *args, **kwargs: (
-                f"{namespace}:{func.__module__}:{func.__name__}:{hash(str(sorted(request.query_params.items())))}"
+                f"{namespace}:{func.__module__}:{func.__name__}:"
+                f"{hashlib.sha256((request.method + ' ' + request.url.path + ' ' + str(sorted(request.query_params.items())) + ' ' + (request.headers.get('authorization') or '')).encode('utf-8')).hexdigest()}"
             ),
         )
         log.info("Redis cache initialized successfully with optimized configuration")
     except Exception as e:
-        log.error(f"Failed to initialize Redis cache: {e}")
-        raise
+        log.warning(f"Failed to initialize Redis cache: {e!r}")
+        return
 
 
 # 创建应用实例

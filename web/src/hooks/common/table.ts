@@ -39,11 +39,7 @@ export function useNaiveTable<ResponseData, ApiData>(options: UseNaiveTableOptio
   });
 
   // calculate the total width of the table this is used for horizontal scrolling
-  const scrollX = computed(() => {
-    return result.columns.value.reduce((acc, column) => {
-      return acc + Number(column.width ?? column.minWidth ?? 120);
-    }, 0);
-  });
+  const scrollX = computed(() => getScrollX(result.columns.value));
 
   scope.run(() => {
     watch(
@@ -135,6 +131,8 @@ export function useNaivePaginatedTable<ResponseData, ApiData>(
     }
   });
 
+  const scrollX = computed(() => getScrollX(result.columns.value));
+
   async function getDataByPage(page: number = 1) {
     if (page !== pagination.page) {
       pagination.page = page;
@@ -166,6 +164,7 @@ export function useNaivePaginatedTable<ResponseData, ApiData>(
 
   return {
     ...result,
+    scrollX,
     getDataByPage,
     pagination,
     mobilePagination
@@ -266,7 +265,6 @@ function getColumnChecks<Column extends NaiveUI.TableColumn<any>>(
         key: column.key as string,
         title: column.title!,
         checked: true,
-        fixed: column.fixed ?? 'unFixed',
         visible: getColumnVisible?.(column) ?? true
       });
     } else if (column.type === 'selection') {
@@ -274,7 +272,6 @@ function getColumnChecks<Column extends NaiveUI.TableColumn<any>>(
         key: SELECTION_KEY,
         title: $t('common.check'),
         checked: true,
-        fixed: column.fixed ?? 'unFixed',
         visible: getColumnVisible?.(column) ?? false
       });
     } else if (column.type === 'expand') {
@@ -282,7 +279,6 @@ function getColumnChecks<Column extends NaiveUI.TableColumn<any>>(
         key: EXPAND_KEY,
         title: $t('common.expandColumn'),
         checked: true,
-        fixed: column.fixed ?? 'unFixed',
         visible: getColumnVisible?.(column) ?? false
       });
     }
@@ -304,18 +300,17 @@ function getColumns<Column extends NaiveUI.TableColumn<any>>(cols: Column[], che
     }
   });
 
-  const filteredColumns = checks
-    .filter(item => item.checked)
-    .map(check => {
-      return {
-        ...columnMap.get(check.key),
-        fixed: check.fixed
-      } as Column;
-    });
+  const filteredColumns = checks.filter(item => item.checked).map(check => columnMap.get(check.key) as Column);
 
   return filteredColumns;
 }
 
 export function isTableColumnHasKey<T>(column: NaiveUI.TableColumn<T>): column is NaiveUI.TableColumnWithKey<T> {
   return Boolean((column as NaiveUI.TableColumnWithKey<T>).key);
+}
+
+function getScrollX<T>(columns: NaiveUI.TableColumn<T>[], minWidth: number = 120) {
+  return columns.reduce((acc, column) => {
+    return acc + Number(column.width ?? column.minWidth ?? minWidth);
+  }, 0);
 }

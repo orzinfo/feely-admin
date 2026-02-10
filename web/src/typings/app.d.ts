@@ -196,7 +196,6 @@ declare namespace App {
     type RouterPushOptions = {
       query?: Record<string, string>;
       params?: Record<string, string>;
-      force?: boolean;
     };
 
     /** The global header props */
@@ -327,7 +326,6 @@ declare namespace App {
         cancel: string;
         close: string;
         check: string;
-        selectAll: string;
         expandColumn: string;
         columnSetting: string;
         config: string;
@@ -527,6 +525,19 @@ declare namespace App {
             title: string;
           };
         };
+        about: {
+          title: string;
+          introduction: string;
+          projectInfo: {
+            title: string;
+            version: string;
+            latestBuildTime: string;
+            githubLink: string;
+            previewLink: string;
+          };
+          prdDep: string;
+          devDep: string;
+        };
         home: {
           branchDesc: string;
           greeting: string;
@@ -555,6 +566,253 @@ declare namespace App {
           };
           creativity: string;
         };
+        function: {
+          tab: {
+            tabOperate: {
+              title: string;
+              addTab: string;
+              addTabDesc: string;
+              closeTab: string;
+              closeCurrentTab: string;
+              closeAboutTab: string;
+              addMultiTab: string;
+              addMultiTabDesc1: string;
+              addMultiTabDesc2: string;
+            };
+            tabTitle: {
+              title: string;
+              changeTitle: string;
+              change: string;
+              resetTitle: string;
+              reset: string;
+            };
+          };
+          multiTab: {
+            routeParam: string;
+            backTab: string;
+          };
+          toggleAuth: {
+            toggleAccount: string;
+            authHook: string;
+            superAdminVisible: string;
+            adminVisible: string;
+            adminOrUserVisible: string;
+          };
+          request: {
+            repeatedErrorOccurOnce: string;
+            repeatedError: string;
+            repeatedErrorMsg1: string;
+            repeatedErrorMsg2: string;
+          };
+        };
+        alova: {
+          scenes: {
+            captchaSend: string;
+            autoRequest: string;
+            visibilityRequestTips: string;
+            pollingRequestTips: string;
+            networkRequestTips: string;
+            refreshTime: string;
+            startRequest: string;
+            stopRequest: string;
+            requestCrossComponent: string;
+            triggerAllRequest: string;
+          };
+        };
+        proNaive: {
+          form: {
+            basic: {
+              title: string;
+              appName: string;
+              appStatus: string;
+              createTime: string;
+              responseDate: string;
+              specificationInfo: string;
+              specificate: string;
+              specificationName: string;
+              specificationValue: string;
+              specificationColorRed: string;
+              specificationColorOrange: string;
+              addSpecificateItem: string;
+              fillValue: string;
+              reset: string;
+              submit: string;
+              add: string;
+              delete: string;
+              color: string;
+              normal: string;
+              anomaly: string;
+            };
+            query: {
+              title1: string;
+              title2: string;
+              appName: string;
+              appStatus: string;
+              createTime: string;
+              responseDate: string;
+              endDate: string;
+              field: string;
+            };
+            step: {
+              title: string;
+              step1: {
+                title: string;
+                field: string;
+                nextStep: string;
+              };
+              step2: {
+                title: string;
+                field: string;
+                prevStep: string;
+                submit: string;
+              };
+            };
+          };
+          table: {
+            remote: {
+              filterCondition: string;
+              name: string;
+              createTime: string;
+              responseTime: string;
+              title: string;
+              replicableText: string;
+              tags: string;
+              dateFormatting: string;
+              image: string;
+            };
+            rowEdit: {
+              title: string;
+              reset: string;
+              submit: string;
+              edit: string;
+              delete: string;
+              save: string;
+              task: string;
+              score: string;
+              time: string;
+              name: string;
+              action: string;
+            };
+          };
+        };
+        manage: {
+          common: {
+            status: {
+              enable: string;
+              disable: string;
+            };
+          };
+          role: {
+            title: string;
+            roleName: string;
+            roleCode: string;
+            roleStatus: string;
+            roleDesc: string;
+            form: {
+              roleName: string;
+              roleCode: string;
+              roleStatus: string;
+              roleDesc: string;
+            };
+            addRole: string;
+            editRole: string;
+            menuAuth: string;
+            buttonAuth: string;
+          };
+          user: {
+            title: string;
+            userName: string;
+            userGender: string;
+            nickName: string;
+            userPhone: string;
+            userEmail: string;
+            userStatus: string;
+            userRole: string;
+            form: {
+              userName: string;
+              userGender: string;
+              nickName: string;
+              userPhone: string;
+              userEmail: string;
+              userStatus: string;
+              userRole: string;
+            };
+            addUser: string;
+            editUser: string;
+            gender: {
+              male: string;
+              female: string;
+            };
+          };
+          menu: {
+            home: string;
+            title: string;
+            id: string;
+            parentId: string;
+            menuType: string;
+            menuName: string;
+            routeName: string;
+            routePath: string;
+            pathParam: string;
+            layout: string;
+            page: string;
+            i18nKey: string;
+            icon: string;
+            localIcon: string;
+            iconTypeTitle: string;
+            order: string;
+            constant: string;
+            keepAlive: string;
+            href: string;
+            hideInMenu: string;
+            activeMenu: string;
+            multiTab: string;
+            fixedIndexInTab: string;
+            query: string;
+            button: string;
+            buttonCode: string;
+            buttonDesc: string;
+            menuStatus: string;
+            form: {
+              home: string;
+              menuType: string;
+              menuName: string;
+              routeName: string;
+              routePath: string;
+              pathParam: string;
+              layout: string;
+              page: string;
+              i18nKey: string;
+              icon: string;
+              localIcon: string;
+              order: string;
+              keepAlive: string;
+              href: string;
+              hideInMenu: string;
+              activeMenu: string;
+              multiTab: string;
+              fixedInTab: string;
+              fixedIndexInTab: string;
+              queryKey: string;
+              queryValue: string;
+              button: string;
+              buttonCode: string;
+              buttonDesc: string;
+              menuStatus: string;
+            };
+            addMenu: string;
+            editMenu: string;
+            addChildMenu: string;
+            type: {
+              directory: string;
+              menu: string;
+            };
+            iconType: {
+              iconify: string;
+              local: string;
+            };
+          };
+        };
       };
       form: {
         required: string;
@@ -580,11 +838,6 @@ declare namespace App {
       };
       datatable: {
         itemCount: string;
-        fixed: {
-          left: string;
-          right: string;
-          unFixed: string;
-        };
       };
     };
 

@@ -22,14 +22,6 @@ router = APIRouter()
 @router.post("/login", summary="登录")
 async def _(credentials: CredentialsSchema):
     user_obj: User | None = await user_controller.authenticate(credentials)  # 账号验证, 失败则触发异常返回请求错误
-    # user_role_code_list = await user_obj.by_user_roles.values_list("role_code", flat=True)
-    # all_login_role_codes = ["R_SUPER", "R_ADMIN", "R_USER"]
-    # for user_role_code in user_role_code_list:
-    #     if user_role_code in all_login_role_codes:
-    #         break
-    # else:
-    #     log.info(f"用户越权登录, 用户名: {user_obj.user_name}")
-    #     return Fail(msg="This user has no permission to login.")
 
     await user_controller.update_last_login(user_obj.id)
     payload = JWTPayload(

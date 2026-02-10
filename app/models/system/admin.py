@@ -45,7 +45,7 @@ class Role(BaseModel, TimestampMixin):
     role_code = fields.CharField(max_length=20, unique=True, description="角色编码")
     role_desc = fields.CharField(max_length=500, null=True, blank=True, description="角色描述")
     by_role_home: fields.ForeignKeyRelation[Menu] = fields.ForeignKeyField(
-        "models.Menu", related_name=None, description="角色首页"
+        "models.Menu", related_name=None, description="角色首页", on_delete=fields.NO_ACTION
     )
     status_type = fields.CharEnumField(enum_type=StatusType, default=StatusType.enable, description="状态")
 
@@ -107,7 +107,7 @@ class Menu(BaseModel, TimestampMixin):
     keep_alive = fields.BooleanField(default=False, description="是否缓存")
     hide_in_menu = fields.BooleanField(default=False, description="是否在菜单隐藏")
     active_menu: fields.ForeignKeyRelation[Menu] = fields.ForeignKeyField(
-        "models.Menu", related_name=None, null=True, description="隐藏的路由需要激活的菜单"
+        "models.Menu", related_name=None, null=True, description="隐藏的路由需要激活的菜单", on_delete=fields.SET_NULL
     )
     fixed_index_in_tab = fields.IntField(null=True, max_length=10, description="固定在页签的序号")
     status_type = fields.CharEnumField(enum_type=StatusType, default=StatusType.enable, description="菜单状态")

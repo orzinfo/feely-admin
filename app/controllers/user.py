@@ -101,7 +101,6 @@ class UserController(CRUDBase[User, UserCreate, UserUpdate]):
             roles_code_list = roles_code_list.split("|")
 
         user_role_objs = await Role.filter(role_code__in=roles_code_list)
-        print("user_role_objs", user_role_objs)
         await user.by_user_roles.clear()
         for user_role_obj in user_role_objs:
             await user.by_user_roles.add(user_role_obj)

@@ -123,16 +123,14 @@ class APILoggerMiddleware(BaseHTTPMiddleware):
 
         return any(include in path for include in APP_SETTINGS.ADD_LOG_ORIGINS_INCLUDE)
 
-    async def _get_user_from_token(self, token: str) -> User | None:
-        """从token获取用户信息"""
+    async def _get_user_id_from_token(self, token: str) -> int | None:
+        """从token获取用户ID，避免数据库查询"""
         try:
             status, _, decode_data = check_token(token.replace("Bearer ", "", 1))
             if status and decode_data:
                 user_id = int(decode_data["data"]["userId"])
-                user_obj = await User.filter(id=user_id).first()
-                if user_obj:
-                    CTX_USER_ID.set(user_id)
-                return user_obj
+                CTX_USER_ID.set(user_id)
+                return user_id
         except Exception:
             pass
         return None
@@ -151,9 +149,9 @@ class APILoggerMiddleware(BaseHTTPMiddleware):
         """创建API日志记录"""
         # 获取用户信息
         token = request.headers.get("Authorization")
-        user_obj = None
+        user_id = None
         if token:
-            user_obj = await self._get_user_from_token(token)
+            user_id = await self._get_user_id_from_token(token)
 
         # 获取请求数据
         request_data = await self._get_request_data(request)
@@ -179,7 +177,7 @@ class APILoggerMiddleware(BaseHTTPMiddleware):
         request.state.api_log_id = api_log_obj.id
 
         # 创建系统日志
-        await Log.create(log_type=LogType.ApiLog, by_user=user_obj, api_log=api_log_obj, x_request_id=x_request_id)
+        await Log.create(log_type=LogType.ApiLog, by_user_id=user_id, api_log=api_log_obj, x_request_id=x_request_id)
 
 
 class APILoggerAddResponseMiddleware(SimpleBaseMiddleware):

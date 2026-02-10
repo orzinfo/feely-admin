@@ -16,9 +16,8 @@ from app.utils.tools import check_url
 oauth2_schema = OAuth2PasswordBearer(tokenUrl="/auth/token", auto_error=False)
 
 
-@lru_cache(maxsize=1000)
-def _decode_token_cached(token: str, secret_key: str, algorithm: str) -> tuple[bool, int, Any]:
-    """缓存的token解码函数，提升性能"""
+def _decode_token(token: str, secret_key: str, algorithm: str) -> tuple[bool, int, Any]:
+    """Token解码函数"""
     try:
         options = {"verify_signature": True, "verify_aud": False, "exp": True}
         decode_data = jwt.decode(token, secret_key, algorithms=[algorithm], options=options)
@@ -33,7 +32,7 @@ def _decode_token_cached(token: str, secret_key: str, algorithm: str) -> tuple[b
 
 def check_token(token: str) -> tuple[bool, int, Any]:
     """检查token有效性"""
-    return _decode_token_cached(token, APP_SETTINGS.SECRET_KEY, APP_SETTINGS.JWT_ALGORITHM)
+    return _decode_token(token, APP_SETTINGS.SECRET_KEY, APP_SETTINGS.JWT_ALGORITHM)
 
 
 class AuthControl:
@@ -111,8 +110,8 @@ class PermissionControl:
         Raises:
             HTTPException: 权限不足时抛出异常
         """
-        # 预加载用户角色
-        await current_user.fetch_related("by_user_roles")
+        # 预加载用户角色及其关联的API
+        await current_user.fetch_related("by_user_roles__by_role_apis")
         user_roles_codes: list[str] = [r.role_code for r in current_user.by_user_roles]
 
         # 超级管理员直接通过
@@ -126,7 +125,7 @@ class PermissionControl:
         path = request.url.path
 
         # 获取用户所有API权限
-        apis = [await role.by_role_apis for role in current_user.by_user_roles]
+        apis = [role.by_role_apis for role in current_user.by_user_roles]
         permission_apis = list(set((api.api_method.value, api.api_path, api.status_type) for api in sum(apis, [])))
 
         # 检查权限

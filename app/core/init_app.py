@@ -56,7 +56,7 @@ def register_db(app: FastAPI):
     register_tortoise(
         app,
         config=APP_SETTINGS.TORTOISE_ORM,
-        generate_schemas=True,
+        generate_schemas=APP_SETTINGS.DEBUG,
     )
 
 

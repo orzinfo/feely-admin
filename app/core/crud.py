@@ -75,8 +75,8 @@ class CRUDBase[ModelType: Model, CreateSchemaType: BaseModel, UpdateSchemaType: 
             query = query.only(*fields)
 
         if count_by_pk_field:
-            total = await query.values_list(self.model._meta.pk_attr, flat=True)
-            total = len(set(total))
+            # 优化：使用数据库层面的去重计数，避免全量加载到内存
+            total = await query.count()
         else:
             total = await query.count()
 
